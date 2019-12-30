@@ -30,6 +30,6 @@ public class TestController {
         for (String orderNo : pushOrder.getOrderList()) {
             System.out.println(orderNo);
         }
-        return "success";
+        return "suc";
     }
 }
