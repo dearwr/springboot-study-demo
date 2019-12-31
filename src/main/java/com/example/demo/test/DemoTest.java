@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.test;
 
 import com.example.demo.entity.Output;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,13 +24,13 @@ public class DemoTest {
         DemoTest demoTest = new DemoTest();
 //        testCase1();
 //        testCase2();
-        new Thread(() -> demoTest.testCase3()).start();
-        new Thread(() -> demoTest.testCase4()).start();
-        try {
-            Thread.sleep(10*1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        new Thread(() -> demoTest.testCase3()).start();
+//        new Thread(() -> demoTest.testCase4()).start();
+//        try {
+//            Thread.sleep(10*1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private static void testCase1() {
