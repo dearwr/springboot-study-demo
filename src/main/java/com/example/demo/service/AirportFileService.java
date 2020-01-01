@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by wangrong 2019/12/30
@@ -50,8 +51,9 @@ public class AirportFileService {
             List<Map<String, String>> dataList = parseData(firstSheet, indexToNameMap);
             // 将解析的数据转化为数据对象
             List<MallProductCode> mallProductCodeList = buildSaveData(dataList);
-            int sucCount = mallProductCodeDao.batchSave(mallProductCodeList);
-            if (sucCount == 0) {
+            // 保存数据到数据库
+            boolean isSaved = persistData(mallProductCodeList);
+            if (isSaved) {
                 // 保存上传的文件
                 String saveMsg = saveSourceFile(sourceFile);
                 if ("suc".equals(saveMsg)) {
@@ -59,10 +61,50 @@ public class AirportFileService {
                 }
                 return MallResponse.fail("数据库保存数据成功，服务器保存文件失败:" + saveMsg);
             }
-            return MallResponse.fail("保存数据库失败记录数：{}", sucCount);
+            return MallResponse.fail("数据库保存数据失败");
         } catch (Exception e) {
             log.info("解析文件报错：" + e.getMessage());
             return MallResponse.fail("解析文件报错：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 保存数据到数据库
+     * @param mallProductCodeList
+     * @return
+     */
+    private boolean persistData(List<MallProductCode> mallProductCodeList) {
+        List<String> skuList = mallProductCodeList.stream().map(MallProductCode::getSku).collect(Collectors.toList());
+        List<MallProductCode> existList = mallProductCodeDao.queryBySkuList(skuList);
+        List<MallProductCode> needSaveList = new ArrayList<>();
+        if (!existList.isEmpty()) {
+            skuList = existList.stream().map(MallProductCode::getSku).collect(Collectors.toList());
+            log.info("数据库已存在相同sku记录：{}" , skuList);
+            String sku;
+            String existSku;
+            boolean isExist;
+            for (MallProductCode productCode : mallProductCodeList) {
+                sku = productCode.getSku();
+                isExist = false;
+                for (MallProductCode existProductCode : existList) {
+                    existSku = existProductCode.getSku();
+                    if (existSku.equals(sku)) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (!isExist) {
+                    needSaveList.add(productCode);
+                }
+            }
+        } else {
+            needSaveList = mallProductCodeList;
+        }
+        try {
+            return mallProductCodeDao.batchSave(needSaveList);
+        } catch (Exception e) {
+            log.info("数据库保存数据发生异常：" + e.getMessage());
+            return false;
         }
     }
 
@@ -106,7 +148,7 @@ public class AirportFileService {
         String columnName;
         String classParam;
         int lastDataRowIndex = sheet.getLastRowNum();
-        for (int rowIndex = 1; rowIndex < lastDataRowIndex; rowIndex++) {
+        for (int rowIndex = 1; rowIndex <= lastDataRowIndex; rowIndex++) {
             dataRow = sheet.getRow(rowIndex);
             rowDataMap = new HashMap<>();
             for (Integer index : indexToNameMap.keySet()) {

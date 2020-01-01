@@ -51,6 +51,7 @@ public class TestController {
             log.info("上传文件名为：" + fileName);
             switch (fileName) {
                 case "airport.xlsx":
+                case "airport.xls":
                     return airportFileService.parseFile(sourceFile);
                 default:
                     return MallResponse.fail("不支持解析该文件，请检查文件名");
