@@ -42,7 +42,7 @@ public class TestController {
 
     @PostMapping("/fileUpload")
     public MallResponse testFileUpload(MultipartFile sourceFile) {
-        if (sourceFile.isEmpty()) {
+        if (sourceFile == null || sourceFile.isEmpty()) {
             log.info("上传文件为空");
             return MallResponse.fail("请选择一个上传的文件");
         }

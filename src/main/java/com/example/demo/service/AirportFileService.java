@@ -47,6 +47,14 @@ public class AirportFileService {
             Sheet firstSheet = workbook.getSheetAt(0);
             // 读取第一行，记录要读取哪些列
             Map<Integer, String> indexToNameMap = parseFirstRow(firstSheet);
+            // 检查文件中未找到对应名称的数据列
+            List<String> noColumnNameList = AirportFileEntity.nameToParamMap.keySet()
+                    .stream()
+                    .filter(columnName -> !indexToNameMap.values().contains(columnName))
+                    .collect(Collectors.toList());
+            if (!noColumnNameList.isEmpty()) {
+                return MallResponse.fail("文件中未找到对应名称的数据列，请检查文件格式", noColumnNameList);
+            }
             // 从第二行开始读取数据
             List<Map<String, String>> dataList = parseData(firstSheet, indexToNameMap);
             // 将解析的数据转化为数据对象
@@ -70,6 +78,7 @@ public class AirportFileService {
 
     /**
      * 保存数据到数据库
+     *
      * @param mallProductCodeList
      * @return
      */
@@ -79,7 +88,7 @@ public class AirportFileService {
         List<MallProductCode> needSaveList = new ArrayList<>();
         if (!existList.isEmpty()) {
             skuList = existList.stream().map(MallProductCode::getSku).collect(Collectors.toList());
-            log.info("数据库已存在相同sku记录：{}" , skuList);
+            log.info("数据库已存在相同sku记录：{}", skuList);
             String sku;
             String existSku;
             boolean isExist;
