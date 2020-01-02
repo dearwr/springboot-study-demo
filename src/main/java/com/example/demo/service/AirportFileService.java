@@ -50,7 +50,7 @@ public class AirportFileService {
             // 检查文件中未找到对应名称的数据列
             List<String> noColumnNameList = AirportFileEntity.nameToParamMap.keySet()
                     .stream()
-                    .filter(columnName -> !indexToNameMap.values().contains(columnName))
+                    .filter(columnName -> !indexToNameMap.containsValue(columnName))
                     .collect(Collectors.toList());
             if (!noColumnNameList.isEmpty()) {
                 return MallResponse.fail("文件中未找到对应名称的数据列，请检查文件格式", noColumnNameList);
