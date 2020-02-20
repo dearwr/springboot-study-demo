@@ -7,6 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created by wangrong 2019/12/15
  */
@@ -24,7 +28,7 @@ public class DemoTest {
         DemoTest demoTest = new DemoTest();
 //        testCase1();
 //        testCase2();
-//        new Thread(() -> demoTest.testCase3()).start();
+        new Thread(() -> demoTest.testCase3()).start();
 //        new Thread(() -> demoTest.testCase4()).start();
 //        try {
 //            Thread.sleep(10*1000);

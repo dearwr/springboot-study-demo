@@ -203,7 +203,8 @@ public class AirportFileService {
             mallProductCode.setHqId(hqId);
             mallProductCode.setBranchId(branchId);
             mallProductCode.setMall(airportFileEntity.getShopName());
-            mallProductCode.setCode(airportFileEntity.getCode());
+            String code = airportFileEntity.getCode();
+            mallProductCode.setCode(code.contains(".") ? code.substring(0, code.indexOf('.')) : code);
             mallProductCode.setMallId(airportFileEntity.getSku());
             mallProductCode.setSku(airportFileEntity.getSku());
             mallProductCodeList.add(mallProductCode);
