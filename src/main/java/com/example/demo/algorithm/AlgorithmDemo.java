@@ -64,9 +64,16 @@ public class AlgorithmDemo {
 //            System.out.println(sortArr[i]);
 //        }
 
+//        // 桶排序测试
+//        int[] arr9 = new int[]{16, 8, 25, 38, 4, 7, 1, 5};
+//        int[] sortArr = bucketSort(arr9, 3);
+//        for (int i = 0; i < sortArr.length; i++) {
+//            System.out.println(sortArr[i]);
+//        }
+
         // 桶排序测试
-        int[] arr9 = new int[]{16, 8, 25, 38, 4, 7, 1, 5};
-        int[] sortArr = bucketSort(arr9, 3);
+        int[] arr10 = new int[]{16, 8, 25, 38, 4, 7, 1, 5};
+        int[] sortArr = baseSort(arr10, 38);
         for (int i = 0; i < sortArr.length; i++) {
             System.out.println(sortArr[i]);
         }
@@ -362,8 +369,9 @@ public class AlgorithmDemo {
      * 时间复杂度: O(n) ~ O(n^2)
      * 空间复杂度: O(n+k)
      * 稳定性： 稳定
-     * @param arr
-     * @param bucketSize
+     *
+     * @param arr        无序数组
+     * @param bucketSize 每个桶装数据大小
      * @return
      */
     public static int[] bucketSort(int[] arr, int bucketSize) {
@@ -389,13 +397,51 @@ public class AlgorithmDemo {
             newInnerArr = new int[len + 1];
             System.arraycopy(bucketInnerArr, 0, newInnerArr, 0, len);
             newInnerArr[len] = arr[j];
-            bucketArr[(arr[j]-minVal) / bucketSize] = newInnerArr;
+            bucketArr[(arr[j] - minVal) / bucketSize] = newInnerArr;
         }
         int arrIndex = 0;
         for (int b = 0; b < bucketArr.length; b++) {
             simpleInsertSort(bucketArr[b]);
             for (int dex = 0; dex < bucketArr[b].length; dex++) {
                 arr[arrIndex++] = bucketArr[b][dex];
+            }
+        }
+        return arr;
+    }
+
+    /**
+     * 基数排序
+     * 时间复杂度: O(n*k) ~ O(n*k)
+     * 空间复杂度: O(n+k)
+     * 稳定性： 稳定
+     *
+     * @param arr    无序数组
+     * @param maxVal 数组中的最大值
+     * @return
+     */
+    public static int[] baseSort(int[] arr, int maxVal) {
+        int bitCount = String.valueOf(maxVal).length();
+        int[][] bucketArr;
+        int bucket;
+        int len;
+        int[] copyArr;
+        int mod = 10;
+        int dev = 1;
+        for (int bit = 1; bit <= bitCount; bit++, dev *= 10, mod *= 10) {
+            bucketArr = new int[10][0];
+            int arrIndex = 0;
+            for (int i = 0; i < arr.length; i++) {
+                bucket = arr[i] % mod / dev;
+                len = bucketArr[bucket].length;
+                copyArr = new int[len + 1];
+                System.arraycopy(bucketArr[bucket], 0, copyArr, 0, len);
+                copyArr[len] = arr[i];
+                bucketArr[bucket] = copyArr;
+            }
+            for (int j = 0; j < bucketArr.length; j++) {
+                for (int size = 0; size < bucketArr[j].length; size++) {
+                    arr[arrIndex++] = bucketArr[j][size];
+                }
             }
         }
         return arr;
