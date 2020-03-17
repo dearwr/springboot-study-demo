@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+//生成多文件，可以将类都生成在一个文件中
+option java_multiple_files = false;
+//包名
+option java_package = "com.example.demo";
+//生成的类名
+option java_outer_classname = "TestProto";
+
+// 定义服务
+service TestService {
+    rpc getResult (stream Identify) returns (stream Msg) {}
+}
+message Identify {
+   string key = 1;
+}
+message Msg {
+   string msg = 1;
+}
