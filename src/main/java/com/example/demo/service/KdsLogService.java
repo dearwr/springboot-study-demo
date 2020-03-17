@@ -32,8 +32,8 @@ public class KdsLogService {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-//            String action = "ITEM_NOTICE";
-            String action = "ORDER_CALL";
+            String action = "ORDER_MAKE";
+//            String action = "ORDER_CALL";
 //                String action = "TAKE_COMPLETE";
             TKdsOperationLog operationLog = new TKdsOperationLog();
             String uuid = UUID.randomUUID().toString();
@@ -44,9 +44,10 @@ public class KdsLogService {
             operationLog.setGrade(grade);
             operationLog.setOrderNo(orderNo);
             operationLog.setAction(action);
+            operationLog.setOrderMode("CALL_MODE");
             kdsOperationLogDao.save(operationLog);
 
-            saveOrder(orderNo, grade);
+//            saveOrder(orderNo, grade);
 
             log.info("保存成功 branchId={}, grade={}, id={}, orderNo={}", 392, operationLog.getGrade(), operationLog.getId(), operationLog.getOrderNo());
         }

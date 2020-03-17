@@ -43,4 +43,6 @@ public class TKdsOperationLog implements Serializable {
 
     private Date uploadTime;
 
+    private String orderMode;
+
 }
