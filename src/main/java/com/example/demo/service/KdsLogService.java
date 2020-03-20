@@ -26,29 +26,31 @@ public class KdsLogService {
     private OrderDao orderDao;
 
     public void save() {
-        for (int i = 1; i <= 1; i++) {
+        for (int i = 1; i <= 2; i++) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(400);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-//            String action = "ITEM_NOTICE";
+//            String action = "ORDER_RECEIVE";
+//            String action = "ORDER_MAKE";
             String action = "ORDER_CALL";
 //                String action = "TAKE_COMPLETE";
             TKdsOperationLog operationLog = new TKdsOperationLog();
             String uuid = UUID.randomUUID().toString();
             String orderNo = uuid.substring(0, 10);
             operationLog.setId(uuid.substring(0, 20));
-            operationLog.setBranchId(392);
-            String grade = "" + i;
+            operationLog.setBranchId(544);
+            String grade = "S6";
             operationLog.setGrade(grade);
-            operationLog.setOrderNo(orderNo);
+            operationLog.setOrderNo("TEST02");
             operationLog.setAction(action);
+            operationLog.setOrderMode("CALL_MODE");
             kdsOperationLogDao.save(operationLog);
 
-            saveOrder(orderNo, grade);
+//            saveOrder(orderNo, grade);
 
-            log.info("保存成功 branchId={}, grade={}, id={}, orderNo={}", 392, operationLog.getGrade(), operationLog.getId(), operationLog.getOrderNo());
+            log.info("保存成功 branchId={}, grade={}, id={}, orderNo={}", operationLog.getBranchId(), operationLog.getGrade(), operationLog.getId(), operationLog.getOrderNo());
         }
     }
 
@@ -71,7 +73,7 @@ public class KdsLogService {
                         Arrays.asList(new OrderItem(orderId, productId++, 1, 1, null),
                                 new OrderItem(orderId, productId++, 1, 1, null)
                         ));
-            }else {
+            } else {
                 item = new OrderItem(orderId, productId++, 1, 1, null);
             }
             orderDao.saveItem(item);
