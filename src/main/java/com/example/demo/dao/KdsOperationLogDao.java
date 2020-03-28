@@ -18,9 +18,9 @@ public class KdsOperationLogDao {
 
     @Transactional(rollbackFor = Exception.class)
     public boolean save(TKdsOperationLog log) {
-        String sql = "insert into t_kds_operation_log(f_time_consuming, f_product_id, f_location, f_order_no, f_id, f_hqid, f_branchid, " +
-                "f_grade, f_device, f_action, f_count,f_order_mode, f_option_time, f_upload_time)" +
-                " values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
+        String sql = "insert into t_kds_operation_log(f_time_consuming, f_product_id, f_location, f_order_no, f_id, f_hqid, " +
+                "f_branchid, f_grade, f_device, f_action, f_count, f_order_mode, f_option_time, f_upload_time)" +
+                " values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  now(), now())";
 
         Object[] params = new Object[]{log.getTimeConsuming(), log.getProductId(), log.getLocation(), log.getOrderNo(),
                 log.getId(), log.getHqId(), log.getBranchId(), log.getGrade(),

@@ -13,7 +13,7 @@ public class TKdsOperationLog implements Serializable {
 
     private String id;
 
-    private int hqId = 199;
+    private int hqId = 3027;
 
     private int branchId;
 
