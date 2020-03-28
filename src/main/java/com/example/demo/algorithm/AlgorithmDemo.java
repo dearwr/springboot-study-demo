@@ -20,14 +20,14 @@ public class AlgorithmDemo {
 //            System.out.println(arr2[i]);
 //        }
 
-//        // 快排测试
-//        int[] arr3 = new int[]{6, 8, 2, 3, 4, 7, 1, 5};
-//        int start = 0;
-//        int end = arr3.length - 1;
-//        quickSort(arr3, start, end);
-//        for (int i = 0; i < arr3.length; i++) {
-//            System.out.println(arr3[i]);
-//        }
+        // 快排测试
+        int[] arr3 = new int[]{8, 7, 6, 4};
+        int start = 0;
+        int end = arr3.length - 1;
+        quickSort(arr3, start, end);
+        for (int i = 0; i < arr3.length; i++) {
+            System.out.println(arr3[i]);
+        }
 
 //        // 插入排序测试
 //        int[] arr4 = new int[]{6, 8, 2, 3, 4, 7, 1, 5};
@@ -71,12 +71,12 @@ public class AlgorithmDemo {
 //            System.out.println(sortArr[i]);
 //        }
 
-        // 桶排序测试
-        int[] arr10 = new int[]{16, 8, 25, 38, 4, 7, 1, 5};
-        int[] sortArr = baseSort(arr10, 38);
-        for (int i = 0; i < sortArr.length; i++) {
-            System.out.println(sortArr[i]);
-        }
+//        // 基数排序测试
+//        int[] arr10 = new int[]{16, 8, 25, 38, 4, 7, 1, 5};
+//        int[] sortArr = baseSort(arr10, 38);
+//        for (int i = 0; i < sortArr.length; i++) {
+//            System.out.println(sortArr[i]);
+//        }
 
 
     }
@@ -106,12 +106,6 @@ public class AlgorithmDemo {
             }
         }
         return false;
-    }
-
-    private static void swap(int[] arr, int i, int j) {
-        int temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
     }
 
     /**
@@ -447,4 +441,10 @@ public class AlgorithmDemo {
         return arr;
     }
 
+
+    private static void swap(int[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
 }
