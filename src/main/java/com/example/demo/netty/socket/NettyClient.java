@@ -1,5 +1,6 @@
 package com.example.demo.netty.socket;
 
+import com.example.demo.entity.ConnectData;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -61,7 +62,7 @@ public class NettyClient {
     public static void main(String[]args) throws InterruptedException, IOException {
         NettyClient bootstrap = new NettyClient(9999, "localhost");
 
-        bootstrap.socketChannel.writeAndFlush("hello");
+        bootstrap.socketChannel.writeAndFlush(new ConnectData(366,"hello"));
 //        while (true){
 //            TimeUnit.SECONDS.sleep(3);
 //            AskMsg askMsg=new AskMsg();

@@ -10,7 +10,10 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.*;
 
 /**
  * Created by wangrong 2020/3/30
@@ -18,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class NettyServer {
 
     private int port;
-    public static SocketChannel socketChannel;
+    public static final Map<Long, List<SocketChannel>> clients = new ConcurrentHashMap<>();
 
     public NettyServer(int port) throws InterruptedException {
         this.port = port;
@@ -46,7 +49,6 @@ public class NettyServer {
         });
         ChannelFuture f = bootstrap.bind(port).sync();
         if (f.isSuccess()) {
-//            socketChannel = (SocketChannel) f.channel();
             System.out.println("server start---------------");
         }
     }
@@ -54,10 +56,13 @@ public class NettyServer {
     public static void main(String[] args) throws InterruptedException {
         NettyServer bootstrap = new NettyServer(9999);
         while (true) {
-            if (socketChannel != null) {
-                socketChannel.writeAndFlush("hello");
+            if (!clients.isEmpty()) {
+                clients.forEach((client,socketQueue)->{
+                   socketQueue.forEach(socketChannel -> socketChannel.writeAndFlush("how are you")
+                   );
+                });
             }
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.SECONDS.sleep(3);
         }
     }
 }
