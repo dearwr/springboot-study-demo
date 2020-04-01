@@ -1,68 +1,116 @@
 package com.example.demo.netty;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
-import io.netty.handler.timeout.IdleStateHandler;
+import com.example.demo.entity.ConnectMsg;
+import com.example.demo.netty.handler.*;
+import com.example.demo.netty.pack.HeaderPack;
+import org.jboss.netty.bootstrap.ClientBootstrap;
+import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
+import org.jboss.netty.channel.*;
+import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
+import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by wangrong 2020/3/30
  */
 public class NettyClient {
-    private int port;
-    private String host;
-    public static SocketChannel socketChannel;
 
-    public NettyClient(int port, String host) {
-        this.port = port;
-        this.host = host;
-    }
+    private static volatile NettyClient instance;
+    private String host = "192.168.31.253";
+    private int port = 9002;
+    private ClientBootstrap bootstrap;
+    private ExecutorService boss;
+    private ExecutorService worker;
+    private ChannelFuture channelFuture;
+    public Channel channel;
 
-    private void run() throws InterruptedException {
-        EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.channel(NioSocketChannel.class);
-        bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-        bootstrap.group(eventLoopGroup);
-        bootstrap.remoteAddress(host, port);
-        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+    private static void launchNerwork() {
+        ChannelFactory factory = new NioDatagramChannelFactory(Executors.newCachedThreadPool());
+        ConnectionlessBootstrap bootstrap = new ConnectionlessBootstrap(factory);
+        bootstrap.setPipelineFactory(() -> {
+            ChannelPipeline pipeline = Channels.pipeline();
+            pipeline.addLast("decoder", new PackDecoder());
+            pipeline.addLast("encoder", new PackEncoder());
+            pipeline.addLast("busi", new MessageHandler());
+            return pipeline;
+        });
+        InetSocketAddress socketAddress = new InetSocketAddress("192.168.174.1", 9999);
+//        logger.info("UdpServerHandler", "udp launchNerwork run on ");
+        ChannelFuture channelFuture = bootstrap.connect(socketAddress);
+        channelFuture.addListener(new ChannelFutureListener() {
             @Override
-            protected void initChannel(SocketChannel socketChannel) throws Exception {
-                socketChannel.pipeline().addLast(new IdleStateHandler(20, 10, 0));
-                socketChannel.pipeline().addLast(new ObjectEncoder());
-                socketChannel.pipeline().addLast(new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
-                socketChannel.pipeline().addLast(new SimpleChannelInboundHandler<String>() {
-                    @Override
-                    protected void channelRead0(ChannelHandlerContext channelHandlerContext, String s) throws Exception {
-                        System.out.println("服务端返回消息");
-                        System.out.println(s);
-                    }
-                });
+            public void operationComplete(ChannelFuture future) throws Exception {
+                if (future.isSuccess()){
+//                    logger.info("link success");
+                    Thread.sleep(10000);
+                    ConnectMsg messageData = new ConnectMsg();
+                    messageData.setIp("666");
+                    messageData.setDeviceUuid("123654");
+                    HeaderPack headerPack = new HeaderPack(330, messageData);
+                    future.getChannel().write(headerPack);
+//                    NettyUtils.sendDeviceData(channelFuture.getChannel(), socketAddress, PackCmd.SEARCCH_PASSDISH);
+                }else{
+                    // 如果发生错误，则访问描述原因的Throwable
+                    Throwable cause = future.getCause();
+                    cause.printStackTrace();
+                }
             }
         });
-        ChannelFuture future = bootstrap.connect(host, port).sync();
-        if (future.isSuccess()) {
-            socketChannel = (SocketChannel) future.channel();
-            System.out.println("-----client connect server success-----");
+    }
+
+    public static NettyClient getInstance() throws InterruptedException {
+        if (instance == null) {
+            synchronized (NettyClient.class) {
+                if (instance == null) {
+                    return new NettyClient();
+                }
+                return instance;
+            }
+        }
+        return instance;
+    }
+
+    private NettyClient() throws InterruptedException {
+        // 客户端的启动类
+        bootstrap = new ClientBootstrap();
+        //线程池
+        boss = Executors.newCachedThreadPool();
+        worker = Executors.newCachedThreadPool();
+        //socket工厂
+        bootstrap.setFactory(new NioClientSocketChannelFactory(boss, worker));
+        //管道工厂
+        bootstrap.setPipelineFactory(() -> {
+            ChannelPipeline pipeline = Channels.pipeline();
+            pipeline.addLast("msgFrame", new MsgFrameDecoder());
+            pipeline.addLast("msgFrame1", new MsgFrameEncoder());
+
+            pipeline.addLast("msgFrame2", new MessageEncoder());
+            pipeline.addLast("msgFrame3", new MessageDecoder());
+            pipeline.addLast("msgFrame4", new MessageHandler());
+            return pipeline;
+        });
+        //连接服务端
+        channelFuture = bootstrap.bind(new InetSocketAddress(host, port)).sync();
+        if (channelFuture.isSuccess()) {
+            channel = channelFuture.getChannel();
+            System.out.println("client link server success");
         }
     }
 
-    public static void main(String[] args) throws InterruptedException, IOException {
-        new NettyClient(9999, "localhost").run();
 
-        while (true) {
-            String msg = "helloworld";
-            byte[] bytes = msg.getBytes(StandardCharsets.UTF_8);
-            socketChannel.writeAndFlush(bytes);
-            Thread.sleep(10000);
-        }
+    public static void main(String[] args) throws InterruptedException {
+        NettyClient.launchNerwork();
+//        NettyClient client = NettyClient.getInstance();
+//        while (true) {
+//            Thread.sleep(10000);
+//            ConnectMsg messageData = new ConnectMsg();
+//            messageData.setIp("666");
+//            messageData.setDeviceUuid("123654");
+//            HeaderPack headerPack = new HeaderPack(CREATE_CONNECT, messageData);
+//            client.channel.write(headerPack);
+//        }
     }
 }

@@ -4,6 +4,7 @@ import com.example.demo.entity.dining.Constants;
 import com.example.demo.entity.dining.WXFormId;
 import com.example.demo.entity.dining.WXTemplateMsg;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
  * 轻量和快速的支付场景下
  * 订单对象
  */
+@ToString
 public class DiningStoreOrder {
     private long id = -1;//主键ID
     private long hqId;//品牌ID
