@@ -1,7 +1,6 @@
 package com.example.demo.netty.handler;
 
-
-import org.jboss.netty.handler.codec.frame.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 public class MsgFrameDecoder extends LengthFieldBasedFrameDecoder {
 

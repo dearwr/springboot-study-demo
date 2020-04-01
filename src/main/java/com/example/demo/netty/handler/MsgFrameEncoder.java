@@ -1,7 +1,7 @@
 package com.example.demo.netty.handler;
 
 
-import org.jboss.netty.handler.codec.frame.LengthFieldPrepender;
+import io.netty.handler.codec.LengthFieldPrepender;
 
 public class MsgFrameEncoder extends LengthFieldPrepender {
 

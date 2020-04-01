@@ -1,63 +1,61 @@
 package com.example.demo.netty;
 
 import com.example.demo.netty.handler.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.*;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import lombok.extern.slf4j.Slf4j;
 
-import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
+@Slf4j
 /**
  * Created by wangrong 2020/3/30
  */
 public class NettyServer {
 
-    private static final Logger logger = LogManager.getLogger(NettyServer.class.getName());
-
     private int port;
-    public static final Map<Long, Channel> clientMap = new ConcurrentHashMap<Long, org.jboss.netty.channel.Channel>();
+    private ServerBootstrap serverBootstrap;
+    public static final Map<Long, Channel> clientMap = new ConcurrentHashMap<>();
 
     public NettyServer(int port) {
         this.port = port;
-        logger.info("----netty port : {} ----", port);
+        log.info("----netty port : {} ----", port);
+        // 服务类,用于启动netty
+        serverBootstrap = new ServerBootstrap();
+        // 新建两个线程池  boss线程监听端口，worker线程负责数据读写
+        EventLoopGroup boss = new NioEventLoopGroup();
+        EventLoopGroup worker = new NioEventLoopGroup();
+        serverBootstrap.group(boss, worker)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        ChannelPipeline pipeline = socketChannel.pipeline();
+                        pipeline.addLast(new MsgFrameDecoder());
+                        pipeline.addLast(new MsgFrameEncoder());
+
+                        pipeline.addLast(new MessageEncoder());
+                        pipeline.addLast(new MessageDecoder());
+                        pipeline.addLast(new MessageHandler());
+                    }
+                });
     }
 
 
-
     private void run() throws InterruptedException {
-        // 服务类,用于启动netty 在netty5中同样使用这个类来启动
-        ServerBootstrap bootstrap = new ServerBootstrap();
-        // 新建两个线程池  boss线程监听端口，worker线程负责数据读写
-        ExecutorService boss = Executors.newCachedThreadPool();
-        ExecutorService worker = Executors.newCachedThreadPool();
-        // 设置niosocket工厂  类似NIO程序新建ServerSocketChannel和SocketChannel
-        bootstrap.setFactory(new NioServerSocketChannelFactory(boss, worker));
-
-        // 设置管道的工厂
-        bootstrap.setPipelineFactory(() -> {
-            ChannelPipeline pipeline = Channels.pipeline();
-            pipeline.addLast("msgFrame1",new MsgFrameDecoder());
-            pipeline.addLast("msgFrame0",new MsgFrameEncoder());
-
-            pipeline.addLast("msgFrame2",new MessageEncoder());
-            pipeline.addLast("msgFrame3",new MessageDecoder());
-            pipeline.addLast("msgFrame4",new MessageHandler());
-            return pipeline;
-        });
-        Channel channel = bootstrap.bind(new InetSocketAddress(port));
+        ChannelFuture future = serverBootstrap.bind(port).sync();
+        if (future.isSuccess()) {
+            log.info("server start");
+        }
     }
 
     public static void main(String[] args) throws InterruptedException {
         new NettyServer(9999).run();
-
     }
+
 }
 
