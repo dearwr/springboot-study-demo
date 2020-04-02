@@ -1,6 +1,5 @@
-package com.example.demo.netty;
+package com.example.demo.netty.netty4;
 
-import com.example.demo.netty.handler.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -31,13 +30,13 @@ public class NettyServer {
         EventLoopGroup worker = new NioEventLoopGroup();
         serverBootstrap.group(boss, worker)
                 .channel(NioServerSocketChannel.class)
+                .childOption(ChannelOption.TCP_NODELAY, true)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
-                        pipeline.addLast(new MsgFrameDecoder());
-                        pipeline.addLast(new MsgFrameEncoder());
-
+//                        pipeline.addLast(new MsgFrameDecoder());
+//                        pipeline.addLast(new MsgFrameEncoder());
                         pipeline.addLast(new MessageEncoder());
                         pipeline.addLast(new MessageDecoder());
                         pipeline.addLast(new MessageHandler());
@@ -51,6 +50,7 @@ public class NettyServer {
         if (future.isSuccess()) {
             log.info("server start");
         }
+        future.channel().closeFuture().sync();
     }
 
     public static void main(String[] args) throws InterruptedException {

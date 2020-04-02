@@ -1,9 +1,8 @@
-package com.example.demo.netty.pack;
+package com.example.demo.pack;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
-import org.apache.poi.ss.formula.functions.T;
 
 @Data
 @ToString
@@ -12,6 +11,6 @@ public class MessageHeader {
 
     private int cmd;
 
-    private MessageBody msgBody;
+    private String msg;
 
 }

@@ -1,8 +1,7 @@
-package com.example.demo.netty.handler;
+package com.example.demo.netty.netty4;
 
-import com.example.demo.netty.pack.MessageHeader;
-import com.example.demo.utils.MessageUtils;
-import io.netty.buffer.ByteBuf;
+import com.example.demo.pack.MessageHeader;
+import com.example.demo.utils.MessageHelper;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +17,6 @@ public class MessageEncoder extends MessageToMessageEncoder<MessageHeader> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, MessageHeader messageHeader, List<Object> list) {
-        ByteBuf buf = ctx.alloc().buffer();
-        MessageUtils.encodeMsgHeader(messageHeader, buf);
-        list.add(buf);
+        MessageHelper.encodeMsgHeader(messageHeader, ctx, list);
     }
 }

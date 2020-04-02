@@ -1,7 +1,7 @@
-package com.example.demo.netty.handler;
+package com.example.demo.netty.netty4;
 
-import com.example.demo.netty.pack.MessageHeader;
-import com.example.demo.utils.MessageUtils;
+import com.example.demo.pack.MessageHeader;
+import com.example.demo.utils.MessageHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +13,7 @@ public class MessageDecoder extends MessageToMessageDecoder<ByteBuf> {
 
     @Override
     protected void decode(io.netty.channel.ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
-        log.info("收到一条信息" + byteBuf.toString());
-        MessageHeader msgHeader = MessageUtils.DecodeMsgHeader(byteBuf);
+        MessageHeader msgHeader = MessageHelper.DecodeMsgHeader(byteBuf);
         list.add(msgHeader);
     }
 

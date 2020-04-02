@@ -1,4 +1,4 @@
-package com.example.demo.netty.handler;
+package com.example.demo.netty.netty4;
 
 
 import io.netty.handler.codec.LengthFieldPrepender;
@@ -6,6 +6,6 @@ import io.netty.handler.codec.LengthFieldPrepender;
 public class MsgFrameEncoder extends LengthFieldPrepender {
 
     public MsgFrameEncoder() {
-        super(2);
+        super(4);
     }
 }

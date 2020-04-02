@@ -1,15 +1,15 @@
-package com.example.demo.netty;
+package com.example.demo.netty.netty4;
 
-import com.example.demo.netty.handler.*;
-import com.example.demo.netty.pack.MessageBody;
-import com.example.demo.netty.pack.MessageHeader;
+import com.example.demo.pack.MessageBody;
+import com.example.demo.pack.MessageHeader;
+import com.example.demo.utils.JsonUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.example.demo.netty.pack.CmdType.CREATE_CONNECT;
+import static com.example.demo.pack.CmdType.CREATE_CONNECT;
 
 /**
  * Created by wangrong 2020/3/30
@@ -17,26 +17,13 @@ import static com.example.demo.netty.pack.CmdType.CREATE_CONNECT;
 @Slf4j
 public class NettyClient {
 
-    private static volatile NettyClient instance;
     private String host = "localhost";
     private int port = 9999;
-    private Bootstrap bootstrap;
+    private static Bootstrap bootstrap;
     private EventLoopGroup eventLoopGroup;
-    public static Channel channel;
+    private Channel channel;
 
-    private static NettyClient getInstance() throws InterruptedException {
-        if (instance == null) {
-            synchronized (NettyClient.class) {
-                if (instance == null) {
-                    return new NettyClient();
-                }
-                return instance;
-            }
-        }
-        return instance;
-    }
-
-    private NettyClient() {
+    public NettyClient() throws InterruptedException {
         bootstrap = new Bootstrap();
         eventLoopGroup = new NioEventLoopGroup();
         bootstrap.group(eventLoopGroup)
@@ -53,28 +40,20 @@ public class NettyClient {
                         pipeline.addLast(new MessageHandler());
                     }
                 });
-    }
-
-    public static Channel getConnect() throws InterruptedException {
-        log.info("try connect to server");
-        ChannelFuture future = getInstance().bootstrap.connect().sync();
+        ChannelFuture future = bootstrap.connect().sync();
         if (future.isSuccess()) {
+            log.info("client start");
             channel = future.channel();
-            log.info("connect to server success");
         }
-        return channel;
     }
-
 
     public static void main(String[] args) throws InterruptedException {
-        Channel channel = NettyClient.getConnect();
-        if (channel != null) {
-            while (true) {
-                Thread.sleep(10000);
-                MessageBody msgBody = new MessageBody("123", new Object());
-                MessageHeader msgHeader = new MessageHeader(CREATE_CONNECT, msgBody);
-                channel.writeAndFlush(msgHeader);
-            }
+        Channel channel = new NettyClient().channel;
+        while (true) {
+            Thread.sleep(10000);
+            MessageBody msgBody = new MessageBody("123", "hello");
+            MessageHeader msgHeader = new MessageHeader(CREATE_CONNECT, JsonUtils.toJson(msgBody));
+            channel.writeAndFlush(msgHeader);
         }
     }
 }
